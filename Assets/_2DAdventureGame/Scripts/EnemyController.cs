@@ -12,9 +12,9 @@ public class EnemyController : MonoBehaviour
     Animator animator;
     float timer;
     int direction = 1;
+    bool broken = true;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-
     void Start()
     {
         rigidbody2d = GetComponent<Rigidbody2D>();
@@ -37,6 +37,11 @@ public class EnemyController : MonoBehaviour
     // FixedUpdate has the same call rate as the physics system
     void FixedUpdate()
     {
+        if (!broken)
+        {
+            return;
+        }
+
         Vector2 position = rigidbody2d.position;
 
         if (vertical)
@@ -63,5 +68,14 @@ public class EnemyController : MonoBehaviour
         {
             player.ChangeHealth(-1);
         }
+    }
+
+    public void Fix()
+    {
+        broken = false;
+        // 적 게임 오브젝트를 물리 시스템의 충돌 시뮬레이션에서 제외.
+        // 투사체가 더 이상 적과 충돌하지 않으며 적 캐릭터에게 피해를 못 주게 됨.
+        rigidbody2d.simulated = false;
+        animator.SetTrigger("Fixed");
     }
 }

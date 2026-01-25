@@ -1,3 +1,4 @@
+using Beginner2D;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -29,11 +30,16 @@ public class PlayerController : MonoBehaviour
     public GameObject projectilePrefab;
     public InputAction LaunchAction;
 
+    // Variables related to NPC
+    private NonPlayerCharacter lastNonPlayerCharacter;
+    public InputAction TalkAction; // 대화 키
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         MoveAction.Enable();
         LaunchAction.Enable();
+        TalkAction.Enable(); // 대화키 가능
         rigidbody2d = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         currentHealth = maxHealth;
@@ -69,6 +75,36 @@ public class PlayerController : MonoBehaviour
             Launch();
         }
 
+        // NPC 레이캐스트 감지 로직
+        // Physics2D.Raycast(시작위치, 방향, 거리, 감지할 레이어)
+        RaycastHit2D hit = Physics2D.Raycast(
+            rigidbody2d.position + Vector2.up * 0.2f, // 시작점: 캐릭터 위치에서 위로 0.2 유닛 (발밑 감지 방지)
+            moveDirection,                             // 방향: 현재 캐릭터가 움직이는(바라보는) 방향
+            1.5f,                                      // 거리: 앞방향으로 1.5 유닛만큼만 레이저를 쏨
+            LayerMask.GetMask("NPC")                   // 필터: "NPC" 레이어가 설정된 오브젝트만 충돌 처리
+        );
+
+        // 레이캐스트에 무언가 감지되었다면
+        if (hit.collider != null)
+        {
+            // 충돌한 오브젝트에서 NonPlayerCharacter 스크립트 컴포넌트를 가져옴
+            NonPlayerCharacter npc = hit.collider.GetComponent<NonPlayerCharacter>();
+
+            npc.dialogueBubble.SetActive(true); // 해당 NPC의 대화 키 표시 말풍선을 화면에 표시
+            lastNonPlayerCharacter = npc;       // 나중에 말풍선을 끄기 위해 현재 NPC 정보를 변수에 저장
+            FindFriend(); // 친구를 찾는 추가 로직 실행
+        }
+        // 레이캐스트에 아무것도 감지되지 않았다면 (NPC 앞을 벗어났다면)
+        else
+        {
+            // 이전에 감지했던 NPC 정보가 변수에 남아있는지 확인
+            if (lastNonPlayerCharacter != null)
+            {
+                lastNonPlayerCharacter.dialogueBubble.SetActive(false); // 켜져 있던 대화 키 말풍선을 다시 끔
+                lastNonPlayerCharacter = null; // NPC 저장 변수를 비움
+            }
+        }
+
     }
 
     // FixedUpdate has the same call rate as the physics system
@@ -97,7 +133,7 @@ public class PlayerController : MonoBehaviour
            예: 체력이 5인데 힐을 100 받아도 최대치인 5로 유지됨! 
         */
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
-        Debug.Log(currentHealth + "/" + maxHealth);
+        UIHandler.instance.SetHealthValue(currentHealth / (float)maxHealth);
 
     }
 
@@ -109,4 +145,13 @@ public class PlayerController : MonoBehaviour
         projectile.Launch(moveDirection, 300);
         animator.SetTrigger("Launch");
     }
+
+    void FindFriend()
+    {
+        if (TalkAction.WasPressedThisFrame()) // 대화 키 누르면
+        {
+            UIHandler.instance.DisplayDialogue();
+        }
+    }
+
 }
