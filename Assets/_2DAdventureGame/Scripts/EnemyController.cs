@@ -1,11 +1,16 @@
 using UnityEngine;
+using System;
 
 public class EnemyController : MonoBehaviour
 {
+  
     // Public variables
     public float speed;
     public bool vertical;
     public float changeTime = 3.0f;
+    public bool isBroken { get { return broken; } }
+    public ParticleSystem smokeParticleEffect;
+    public event Action OnFixed; // 적이 수정될 때 다른 스크립트에 알림을 보내는 데 사용
 
     // Private variables
     Rigidbody2D rigidbody2d;
@@ -77,5 +82,7 @@ public class EnemyController : MonoBehaviour
         // 투사체가 더 이상 적과 충돌하지 않으며 적 캐릭터에게 피해를 못 주게 됨.
         rigidbody2d.simulated = false;
         animator.SetTrigger("Fixed");
+        smokeParticleEffect.Stop(); // 고친 후 연기 안 남
+        OnFixed?.Invoke(); // 알림 실행
     }
 }

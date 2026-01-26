@@ -12,6 +12,13 @@ public class UIHandler : MonoBehaviour
     private VisualElement m_NonPlayerDialogue; // NPC 대화창 UI 요소
     private float m_TimerDisplay; // 남은 표시 시간을 체크할 타이머
 
+    // 승패 장면
+    private VisualElement m_WinScreen;
+    private VisualElement m_LoseScreen;
+
+    // 로봇 카운터
+    private Label m_RobotCounter;
+
     // Awake is called when the script instance is being loaded (in this situation, when the game scene loads)
     private void Awake()
     {
@@ -35,6 +42,12 @@ public class UIHandler : MonoBehaviour
         m_NonPlayerDialogue = uiDocument.rootVisualElement.Q<VisualElement>("NPCDialogue");
         m_NonPlayerDialogue.style.display = DisplayStyle.None;
         m_TimerDisplay = -1.0f; // 타이머 초기화 (-1은 작동하지 않는 상태를 의미)
+
+        m_LoseScreen = uiDocument.rootVisualElement.Q<VisualElement>("LoseScreenContainer");
+        m_WinScreen = uiDocument.rootVisualElement.Q<VisualElement>("WinScreenContainer");
+
+        m_RobotCounter = uiDocument.rootVisualElement.Q<Label>("CounterLabel");
+
     }
 
     // 외부(예: Player 스크립트)에서 체력 수치를 변경할 때 호출하는 함수
@@ -65,4 +78,21 @@ public class UIHandler : MonoBehaviour
         m_NonPlayerDialogue.style.display = DisplayStyle.Flex; // 대화창 보이기
         m_TimerDisplay = displayTime; // 타이머 리셋
     }
+
+    public void DisplayWinScreen()
+    {
+        m_WinScreen.style.opacity = 1.0f;
+    }
+
+    public void DisplayLoseScreen()
+    {
+        m_LoseScreen.style.opacity = 1.0f;
+    }
+
+    // 로봇 숫자를 업데이트하는 함수
+    public void SetCounter(int current, int enemies)
+    {
+        m_RobotCounter.text = $"{current} / {enemies}";
+    }
+
 }

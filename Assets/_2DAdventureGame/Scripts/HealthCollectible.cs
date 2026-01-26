@@ -3,6 +3,9 @@ using UnityEngine;
 // HealthCollectible 클래스: 아이템(체력 회복 아이템 등)에 부착하는 스크립트입니다.
 public class HealthCollectible : MonoBehaviour
 {
+
+    public AudioClip collectedClip;
+
     // OnTriggerEnter2D: 이 오브젝트의 Trigger Collider에 다른 오브젝트가 들어왔을 때 호출됩니다.
     // 'other' 변수는 방금 부딪힌(겹쳐진) 상대방의 Collider 정보입니다.
     void OnTriggerEnter2D(Collider2D other)
@@ -13,11 +16,9 @@ public class HealthCollectible : MonoBehaviour
         // 2. 만약 상대방에게 PlayerController가 있고 최대 체력이 아니면
         if (controller != null && controller.health < controller.maxHealth)
         {
-            // 3. 플레이어의 현재 체력이 최대치보다 적은지 체크하는 로직이 있으면 더 좋습니다.
-            // 여기서는 플레이어 스크립트의 ChangeHealth 함수를 호출해 체력을 1 증가시킵니다.
+            controller.PlaySound(collectedClip);
             controller.ChangeHealth(1);
 
-            // 4. 아이템을 먹었으므로, 게임 화면에서 아이템 오브젝트를 삭제합니다.
             Destroy(gameObject);
         }
     }

@@ -1,6 +1,6 @@
-using Beginner2D;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
@@ -34,6 +34,12 @@ public class PlayerController : MonoBehaviour
     private NonPlayerCharacter lastNonPlayerCharacter;
     public InputAction TalkAction; // 대화 키
 
+    // Variables related to audio
+    AudioSource audioSource;
+
+    // 액션 이벤트
+    public event Action OnTalkedToNPC;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -43,6 +49,8 @@ public class PlayerController : MonoBehaviour
         rigidbody2d = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         currentHealth = maxHealth;
+        audioSource = GetComponent<AudioSource>();
+
     }
 
     // Update is called once per frame
@@ -150,8 +158,13 @@ public class PlayerController : MonoBehaviour
     {
         if (TalkAction.WasPressedThisFrame()) // 대화 키 누르면
         {
-            UIHandler.instance.DisplayDialogue();
+            OnTalkedToNPC?.Invoke(); // 알림
         }
+    }
+
+    public void PlaySound(AudioClip clip)
+    {
+        audioSource.PlayOneShot(clip); // 한 번만 소리 재생하는 함수
     }
 
 }
